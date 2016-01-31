@@ -1,35 +1,40 @@
 var glob = require('glob');
 var path = require('path');
 var compare = require('./structural-comparison');
+
 var nameRegex = /Abgaben\/(\D+)_\d/;
+var dir       = 'C:/Users/amenthes/workspace/h_da 2015 P2 JS Abgaben/';
+var extension = 'js';
+var negative_filter = ['jquery[-\.]', 'example-', 'phaser\.min\.js', 'raphael-min\.js'];
 
-var js = glob.sync('C:/Users/amenthes/workspace/h_da 2015 P2 JS Abgaben/**/*.js');
-js = js.filter(function (name) {
-  var include = !name.match(/jquery[-\.]/i) && !name.includes('example-') && !name.includes('phaser.min.js') && !name.includes('raphael-min.js');
-  if (!include) console.warn("Skipping %s", name);
-  return include;
-});
+var files = glob
+            .sync(dir + '**/*.' + extension)
+            .filter(function (name) {
+              var exclude = name.search(new RegExp(negative_filter.join('|'))) > -1
+              if (exclude) console.warn('Skipping %s', name);
+              return !exclude;
+            })
+            .filter(function (name) {
+              // Was macht das?
+              return !name.includes('teil2.js') && !name.includes('teil1.js');
+            })
+            .sort(function (a, b) {
+              var ba = path.basename(a);
+              var bb = path.basename(b);
+              if (ba > bb) { return 1; }
+              if (ba < bb) { return -1; }
+              return 0;
+            });
 
-js = js.filter(function (name) {
-  return !name.includes("teil2.js") && !name.includes('teil1.js');
-});
+var jsFileNumber = js.length;
 
-js.sort(function (a, b) {
-  var ba = path.basename(a);
-  var bb = path.basename(b);
-  if (ba > bb) { return 1; }
-  if (ba < bb) { return -1; }
-  return 0;
-});
-
-jsFileNumber = js.length;
-
-console.log("<html><head><meta http-equiv='content-type' content='text/html; charset=utf-8'><style>table span {display:none;} th {writing-mode:vertical-lr; white-space:nowrap; } td {white-space:nowrap;}</style></head><body><table><tr><th></th>");
+// Template / View
+console.log('<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><style>table span {display:none;} th {writing-mode:vertical-lr; white-space:nowrap; } td {white-space:nowrap;}</style></head><body><table><tr><th></th>');
 js.forEach(function (file) {
   var info = fileInfo(file);
-  console.log("<th>%s / %s</th>", info.student, info.basename);
+  console.log('<th>%s / %s</th>', info.student, info.basename);
 });
-console.log("</tr>");
+console.log('</tr>');
 
 
 js.forEach(function (fileA, index) {
